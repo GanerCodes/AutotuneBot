@@ -16,7 +16,7 @@ exts = ["mp4", "webm", "mov", "mkv"]
 if not path.isdir(dr):
 	makedirs(dr)
 
-bot = discord.Client()
+bot = discord.AutoShardedClient()
 
 @bot.event
 async def on_ready():
