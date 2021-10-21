@@ -1,12 +1,13 @@
-import download, autotune, threading, random, tweepy, time, os
+import download, autotune, threading, random, tweepy, json, time, os
 from subprocessHelper import *
 
 #I use a weird tweepy mod that fixes video upload to make this work
 
-APIkey = r"TOKEN"
-APIsecretKey = r"TOKEN"
-AccessToken = r"TOKEN-TOKEN"
-AccessTokenSecret = r"TOKEN"
+tokens = json.load(open("tokens.json"))
+APIkey = tokens["twitterAPIkey"]
+APIsecretKey = tokens["twitterAPIsecretKey"]
+AccessToken = tokens["twitterAccessToken"]
+AccessTokenSecret = tokens["twitterAccessTokenSecret"]
 auth = tweepy.OAuthHandler(APIkey, APIsecretKey)
 auth.set_access_token(AccessToken, AccessTokenSecret)
 api = tweepy.API(auth)

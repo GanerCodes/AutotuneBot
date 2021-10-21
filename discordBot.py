@@ -1,4 +1,4 @@
-import discord, asyncio, random
+import discord, asyncio, random, json
 from concurrent.futures import ThreadPoolExecutor
 from subprocessHelper import *
 from pathHelper import *
@@ -7,6 +7,7 @@ from autotune import *
 from os import remove, path, makedirs
 from re import sub
 
+TOKEN = json.load(open("tokens.json"))["discord"]
 
 messageCheckAmount = 10
 dr = "files"
@@ -29,7 +30,7 @@ async def on_message(message):
 
 	if message.content.strip().lower() == "autotune help":
 		await message.channel.send("""Bot usage:
-	Autotune <link or search query> - Autotune a video to another video.""")
+	Autotune <link or search query> - Autotune a video (attached, replied to, or recent in channel) to another video.""")
 	elif (s := message.content.strip().lower()).startswith("autotune"):
 		attach = None
 		if len(message.attachments) > 0:
@@ -37,9 +38,9 @@ async def on_message(message):
 		elif message.reference and len(tmpDat := (await message.channel.fetch_message(message.reference.message_id)).attachments) > 0:
 			attach = tmpDat[0]
 		else:
-			async for message in message.channel.history(limit = messageCheckAmount):
-				if len(message.attachments) > 0:
-					attach = message.attachments[0]
+			async for m in message.channel.history(limit = messageCheckAmount):
+				if len(m.attachments) > 0:
+					attach = m.attachments[0]
 					break
 		if attach:
 			if getExt(attach.filename) in exts:
@@ -65,4 +66,4 @@ async def on_message(message):
 			await message.channel.send("Please attach a video to use autotune.")
 
 print("Starting bot...")
-bot.run("TOKEN")
+bot.run(TOKEN)
