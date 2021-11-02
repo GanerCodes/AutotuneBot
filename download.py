@@ -2,7 +2,6 @@ from os import path, makedirs
 from json import loads
 from requests import get
 from subprocessHelper import *
-# from fixPrint import fixPrint
 fixPrint = print
 import argparse
 
@@ -67,7 +66,7 @@ def download(name, url, skip = None, delay = None, duration = None, video = True
 
     #  print(url)
 
-    urlCMD = ["youtube-dl", "--no-playlist", "-g"]
+    urlCMD = ["yt-dlp", "--no-playlist", "-g"]
     if verbose:
         urlCMD += ["--verbose"]
     if cookies and path.isfile(cookies): urlCMD += ["--cookies", cookies]

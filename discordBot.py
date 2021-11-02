@@ -1,4 +1,4 @@
-import discord, asyncio, random, json
+import discord, asyncio, random, json, os
 from concurrent.futures import ThreadPoolExecutor
 from subprocessHelper import *
 from pathHelper import *

@@ -1,7 +1,6 @@
-import download, autotune, threading, random, tweepy, json, time, os
+import download, autotune, threading, random, tweepy, time, os, json
 from subprocessHelper import *
-
-#I use a weird tweepy mod that fixes video upload to make this work
+from os import remove, path, makedirs
 
 tokens = json.load(open("tokens.json"))
 APIkey = tokens["twitterAPIkey"]
@@ -21,18 +20,15 @@ def getIDlist(ls):
 	return [getID(i) for i in ls]
 
 def threadedProcess(tweetID, url, song, tagName):
-	try:
-		filename = directory + '/' + str(random.random()) + '.mp4'
-		download.download(filename, url, duration = 2 * 60)
-		if type(result := autotune.autotuneURL(filename, song)) == str:
-			upload_result = api.media_upload(filename, media_category = 'tweet_video')
-			api.update_status(media_ids = [upload_result.media_id], status = '@' + tagName, in_reply_to_status_id = tweetID)
-			print("SUCCESS", tweetID, song, tagName)
-			os.remove(filename)
-		else:
-			print("ERROR", tweetID, song, tagName, result)
-	except Exception as e:
-		print("ERROR", e)
+	filename = directory + '/' + str(random.random()) + '.mp4'
+	download.download(filename, url, duration = 2 * 60)
+	if type(autotune.autotuneURL(filename, song)) == str:
+		upload_result = api.media_upload(filename)
+		api.update_status(media_ids = [upload_result.media_id], status = '@' + tagName, in_reply_to_status_id = tweetID)
+		print("SUCCESS", tweetID, song, tagName)
+		os.remove(filename)
+	else:
+		print("ERROR", tweetID, song, tagName)
 
 def testTweet(tweet):
 	tweetText = ' '.join(filter(lambda x: x.strip()[0] != '@', tweet.full_text.split()))
@@ -46,13 +42,7 @@ def testTweet(tweet):
 	return [tweet.id, None, tweetText]
 
 
-while 1:
-	try:
-		mostRecentID = getID(list(api.mentions_timeline(count = 1, tweet_mode = 'extended'))[0])
-		break
-	except Exception as e:
-		print(e)
-		time.sleep(45)
+mostRecentID = getID(list(api.mentions_timeline(count = 1, tweet_mode = 'extended'))[0]) - 1
 print("Most recent tweet ID:", mostRecentID)
 
 mentionsList, ignoreList = [], []
@@ -66,15 +56,16 @@ while 1:
 	ignoreList += getIDlist(activeList)
 	for tweet in activeList:
 		# print(tweet)
-		if tweet._json['user']['screen_name'] == "autotunebot":
-			continue
 		result = testTweet(tweet)
 		if result[1]:
 			threadedProcess(*result, tweet._json['user']['screen_name'])
 		else:
 			if (topID := tweet._json['in_reply_to_status_id_str']) is not None:
-				topTweet = api.get_status(topID, tweet_mode = 'extended')
-				topResult = testTweet(topTweet)
-				threadedProcess(result[0], topResult[1], result[2], tweet._json['user']['screen_name'])
+				try:
+					topTweet = api.get_status(topID, tweet_mode = 'extended')
+					topResult = testTweet(topTweet)
+					threadedProcess(result[0], topResult[1], result[2], tweet._json['user']['screen_name'])
+				except Exception as e:
+					print(f"Error procesing tweet: {e}")
 		
 	time.sleep(20)
