@@ -51,7 +51,7 @@ async def on_message(message):
 					result = await loop.run_in_executor(ThreadPoolExecutor(), autotuneURL, fileName, spl[1])
 					if type(result) == str:
 						try:
-							await message.channel.send("Your autism, sire.", file = discord.File(result))
+							await message.channel.send("Autotuning go ETH! 0x013d1361177ab72b0cf096bd34fa671efb3eeeee", file = discord.File(result))
 							remove(result)
 						except Exception as e:
 							print(e)
