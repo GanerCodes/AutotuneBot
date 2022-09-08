@@ -17,7 +17,10 @@ exts = ["mp4", "webm", "mov", "mkv"]
 if not path.isdir(dr):
 	makedirs(dr)
 
-bot = discord.AutoShardedClient()
+intents = discord.Intents.default()
+intents.messages = True
+# intents.members = True
+bot = discord.AutoShardedClient(intents=intents)
 
 @bot.event
 async def on_ready():
@@ -27,6 +30,8 @@ async def on_ready():
 async def on_message(message):
 
 	if (not message.guild) or (not message.channel.permissions_for(message.guild.me).send_messages): return
+	
+	message.content = message.content.replace(f'<@{bot.user.id}>', 'autotune')
 
 	if message.content.strip().lower() == "autotune help":
 		await message.channel.send("""Bot usage:

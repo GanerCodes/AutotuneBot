@@ -4,11 +4,13 @@ from pathHelper import *
 from subprocessHelper import *
 import subprocess, random
 
+# USEWINE = []
+USEWINE = ['wine']
 
 loglevel = "error"
 
 def getDur(f):
-	return eval(subprocess.getoutput(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", f]))
+	return eval(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", f], stdout=subprocess.PIPE).stdout)
 
 def autotune(base, over, filename, strength = 75, executableName = "./autotune.exe", reformatAudio = True, hz = 48000):
 	strength = max(1, min(strength, 512))
@@ -16,7 +18,7 @@ def autotune(base, over, filename, strength = 75, executableName = "./autotune.e
 		baseDur = getDur(base)
 		loud_run(["ffmpeg", "-y", "-hide_banner", "-loglevel", loglevel, "-i", base, "-ac", "1", "-ar", hz, base := chExt(addPrefix(absPath(base), 'AT_'), 'wav')])
 		loud_run(["ffmpeg", "-y", "-hide_banner", "-loglevel", loglevel, "-i", over, "-ac", "1", "-ar", hz, '-t', str(baseDur), over := chExt(addPrefix(absPath(over), 'AT_'), 'wav')])
-	silent_run([executableName, '-b', strength, base, over, filename])
+	silent_run(USEWINE + [executableName, '-b', strength, base, over, filename])
 	if reformatAudio:
 		remove(base)
 		remove(over)
